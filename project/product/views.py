@@ -5,6 +5,17 @@ from rest_framework.response import Response
 from .serializers import ProductSerializer
 from .filters import ProductsFilter
 from rest_framework.pagination import PageNumberPagination
+from rest_framework import viewsets
+from rest_framework.exceptions import NotFound
+
+
+
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()  
+    serializer_class = ProductSerializer
+
 
 
 @api_view(['GET'])
@@ -23,7 +34,11 @@ def get_all_products(request):
 
 @api_view(['GET'])
 def get_by_id_product(request, pk):
-    product = get_object_or_404(Product, id=pk)
+    try:
+        product = get_object_or_404(Product, id=pk)
+    except Http404:
+        raise NotFound("Product not found")
     serializer = ProductSerializer(product, many=False)
-
     return Response({'product': serializer.data})
+
+
